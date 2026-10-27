@@ -1,17 +1,17 @@
-# KHWEZI MINING CONTROL CENTRE - MINN2020A
-# Beginner-friendly Streamlit application for Parts A to H
+# KHWEZI MINING MONITERING - MINN2020A
+
 import os
 import pandas as pd
 import streamlit as st
 
 st.set_page_config(page_title="Khwezi Mining", page_icon="⛏️", layout="wide")
 
-# The Excel file must be in the same folder as this Python file.
+
 FOLDER = os.path.dirname(os.path.abspath(__file__))
 EXCEL_FILE = os.path.join(FOLDER, "Khwezi_Mining_Data.xlsx")
 WORKER_FILE = os.path.join(FOLDER, "worker_records.csv")
 
-# PART A: Each role can open only its allowed pages.
+# PART A
 permissions = {
     "Administrator": ["Dashboard", "Worker Safety", "Safety Incidents", "Equipment", "Maintenance", "Risk Assessment", "Alerts", "Reports", "Manage Users"],
     "Safety Officer": ["Dashboard", "Worker Safety", "Safety Incidents", "Risk Assessment", "Reports"],
@@ -20,7 +20,7 @@ permissions = {
     "Manager": ["Dashboard", "Worker Safety", "Safety Incidents", "Equipment", "Maintenance", "Risk Assessment", "Reports"],
 }
 
-# Read the workbook. Each sheet becomes a pandas DataFrame.
+
 def load_data():
     if not os.path.exists(EXCEL_FILE):
         st.error("Place Khwezi_Mining_Data.xlsx in the same folder as this app.")
@@ -30,7 +30,7 @@ def load_data():
         data["Worker Safety"] = pd.read_csv(WORKER_FILE).fillna("")
     return data
 
-# Show a table with an optional download button.
+
 def show_table(table, filename):
     st.dataframe(table, use_container_width=True, hide_index=True)
     st.download_button("Download CSV", table.to_csv(index=False), file_name=filename, mime="text/csv")
@@ -60,14 +60,14 @@ def dashboard(data):
     st.title("⛏️ Mining Monitoring")
     st.caption("Khwezi Mining | Health, safety and equipment overview")
 
-    # Load the data
+    
     workers = data["Worker Safety"]
     incidents = data["Safety Incidents"]
     observations = data["Safety Observations"]
     equipment = data["Equipment"]
     alerts = data["Alerts"]
 
-    # Calculate safety indicators
+    # this is our calculation for safety indicators
     total_workers = workers["Worker ID"].nunique()
     total_incidents = incidents["Incident ID"].nunique()
 
@@ -85,7 +85,7 @@ def dashboard(data):
         workers["PPE Compliance"].astype(str).str.lower() == "yes"
     ).mean() * 100 if not workers.empty else 0
 
-    # Calculate equipment indicators
+    # this is our calculation for equipment indicators
     total_equipment = equipment["Equipment ID"].nunique()
 
     under_maintenance = (
@@ -108,7 +108,7 @@ def dashboard(data):
         (equipment_alerts["Status"].astype(str).str.lower() == "open")
     ]
 
-    # Main summary cards
+    
     st.subheader("Mining Overview")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -120,7 +120,7 @@ def dashboard(data):
 
     st.divider()
 
-    # Worker Safety Overview
+    # Overview of Worker Safety 
     st.subheader("Worker Safety Overview")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -136,7 +136,7 @@ def dashboard(data):
 
     st.divider()
 
-    # Equipment Overview
+    # Overview of Equipment 
     st.subheader("Equipment Overview")
 
     col1, col2, col3, col4 = st.columns(4)
@@ -160,7 +160,7 @@ def dashboard(data):
 
     st.divider()
 
-    # Safety charts
+    # Charts of Safety 
     st.subheader("Safety Monitoring")
 
     left, right = st.columns(2)
@@ -173,11 +173,11 @@ def dashboard(data):
         st.write("Worker risk levels")
         st.bar_chart(workers["Risk level"].value_counts())
 
-    # Equipment chart
+    # Chart of Equipment 
     st.subheader("Equipment Monitoring")
     st.bar_chart(equipment["Maintenance Status"].value_counts())
 
-    # Critical alerts table
+    # Table of Critical alerts 
     st.subheader("Open Critical Equipment Alerts")
 
     if critical_alerts.empty:
@@ -189,7 +189,7 @@ def dashboard(data):
             hide_index=True
         )
 
-# PART B: View, search and add workers.
+# PART B: part where we view, search and add workers.
 def worker_safety(data):
     st.header("Part B | Worker Health and Safety")
     workers = data["Worker Safety"]
@@ -233,7 +233,7 @@ def worker_safety(data):
         else:
             show_table(warnings, "worker_warnings.csv")
 
-# PART C: View recorded safety incidents.
+# PART C: this is where we view recorded safety incidents.
 def safety_incidents(data):
     st.header("Safety Incidents")
     incidents = data["Safety Incidents"]
@@ -242,7 +242,7 @@ def safety_incidents(data):
         incidents = incidents[incidents["Severity"] == severity]
     show_table(incidents, "safety_incidents.csv")
 
-# PART E: Temperature and vibration use the thresholds from your code.
+# PART E: our temperature and vibration use the thresholds from our code.
 def condition_check(equipment_id, temperature, vibration):
     st.write("Equipment ID:", equipment_id)
     if temperature < 80:
@@ -258,7 +258,7 @@ def condition_check(equipment_id, temperature, vibration):
     else:
         st.error("Vibration: CRITICAL - inspection required")
 
-# PART E: Show equipment records and check readings.
+# PART E: this is where we view our equipment records and check readings.
 def equipment_monitoring(data):
     st.header("Part E | Equipment Condition Monitoring")
     equipment = data["Equipment"]
@@ -273,7 +273,7 @@ def equipment_monitoring(data):
         if st.button("Check equipment condition"):
             condition_check(equipment_id, temperature, vibration)
 
-# PART F: Maintenance availability and warning checks.
+# PART F: this is for maintenance availability and warning checks.
 def maintenance_monitoring(data):
     st.header("Part F | Maintenance Monitoring")
     tab1, tab2 = st.tabs(["Maintenance records", "Calculate maintenance status"])
@@ -333,7 +333,7 @@ def risk_assessment(data):
             else:
                 st.success("Risk classification recorded.")
 
-# PART H: Check equipment alerts and other safety records.
+# PART H: this is where we check our equipment alerts and other safety records.
 def alerts_monitoring(data):
     st.header("Part H | Alerts and Notifications")
     equipment = data["Equipment"]
@@ -375,20 +375,20 @@ def alerts_monitoring(data):
     st.subheader("All recorded alerts")
     show_table(data["Alerts"], "alerts.csv")
 
-# Reports use the records already loaded into pandas.
+
 def reports(data):
     st.header("Reports")
     sheet = st.selectbox("Choose report", ["Worker Safety", "Safety Incidents", "Equipment", "Maintenance", "Risk Assessments", "Alerts", "Safety Observations"])
     show_table(data[sheet], sheet.lower().replace(" ", "_") + ".csv")
 
-# Only administrators may view the user list.
+
 def manage_users(data):
     st.header("Manage Users")
     users = data["Users"].drop(columns=["Password"], errors="ignore")
     st.info("User accounts are read from the workbook. Passwords are not displayed.")
     st.dataframe(users, use_container_width=True, hide_index=True)
 
-# Styling changes the appearance only, not the calculations.
+# this is for styling , where we see our appearance only, not the calculations.
 st.markdown("""
 <style>
 
